@@ -2,7 +2,7 @@ import streamlit as st
 
 st.title("🎈 Scada Analytics")
 st.write(
-    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
+    "Power Curve - Vestas V90 2 MW MK7 VCS"
 )
 import streamlit as st
 import pandas as pd
