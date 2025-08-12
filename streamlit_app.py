@@ -516,12 +516,13 @@ if uploaded_file:
                              valid_cnt,
                              f"{valid_cnt / len(df_clean) * 100:.1f}%")
 
-        avg_wind = df_for_analysis['Wind_Raw'].mean()
+        # Changed to use all wind data (df_clean) instead of just valid data (df_for_analysis)
+        avg_wind = df_clean['Wind_Raw'].mean()
         avg_power = df_for_analysis['Power_Raw'].mean()
         cols_stats[2].metric(
             "Average Wind Speed",
             f"{avg_wind:.2f} m/s",
-            f"±{df_for_analysis['Wind_Raw'].std():.2f}"
+            f"±{df_clean['Wind_Raw'].std():.2f}"
         )
         cols_stats[3].metric(
             "Average Power",
