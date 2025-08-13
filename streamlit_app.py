@@ -700,7 +700,7 @@ if uploaded_file:
 </head>
 <body>
     <div class="container">
-        <h1>🌬️ Power Curve Analysis - Vestas V90 2MW MK7</h1>
+        <h1>ERS Power Curve Analysis - Vestas V90 2MW MK7</h1>
         <p>Report generated on {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
         <p>File analyzed: {uploaded_file.name}{' - Sheet: ' + sheet_name_1 if sheet_name_1 else ''}</p>
         
