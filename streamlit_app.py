@@ -48,7 +48,7 @@ air_density_default = 1.225  # kg/m3 (standard)
 # =========================
 st.set_page_config(layout="wide", page_title="ERS Advanced SCADA Analysis", page_icon="ERS")
 st.title("ERS Advanced SCADA Analysis - Vestas V90 2MW MK7")
-st.subheader("ERS - Official V90 2MW MK7 Power Curve Table")
+st.subheader("Official V90 2MW MK7 Power Curve Table")
 st.dataframe(power_curve_df, height=350)
 excel_buffer_curve = BytesIO()
 with pd.ExcelWriter(excel_buffer_curve, engine='xlsxwriter') as writer:
