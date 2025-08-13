@@ -132,7 +132,8 @@ def find_column(frame, patterns):
             return col
     return None
     
-def process_turbine_data(uploaded_file, conversion_needed, sample_fraction, start_date, end_date):
+# FIX: Add `file_id` to process_turbine_data function to create unique selectbox keys
+def process_turbine_data(uploaded_file, conversion_needed, sample_fraction, start_date, end_date, file_id):
     if uploaded_file is None:
         return None, None
     
@@ -154,7 +155,13 @@ def process_turbine_data(uploaded_file, conversion_needed, sample_fraction, star
                 if not xls.sheet_names:
                     st.error("Excel file contains no sheets")
                     return None, None
-                sheet_name = st.selectbox(f"Select sheet for {uploaded_file.name}", xls.sheet_names)
+                
+                # FIX: Add a unique key for each file upload
+                sheet_name = st.selectbox(
+                    f"Select sheet for {uploaded_file.name}", 
+                    xls.sheet_names, 
+                    key=f"sheet_name_{file_id}_{uploaded_file.name}"
+                )
                 df = pd.read_excel(uploaded_file, sheet_name=sheet_name)
             except Exception as e:
                 st.error(f"Error reading Excel file: {str(e)}")
@@ -247,11 +254,13 @@ if db_type != "None":
 st.sidebar.subheader("📈 Turbine Comparison")
 compare_mode = st.sidebar.checkbox("Compare with another turbine?", value=False)
 uploaded_file_2 = None
+fig_compare_html = '' # Initialize a variable for the comparison plot HTML
 if compare_mode:
     uploaded_file_2 = st.sidebar.file_uploader("📄 Upload SCADA file for Turbine 2", type=["xlsx", "csv"])
 
 if uploaded_file:
-    df_clean_1, sheet_name_1 = process_turbine_data(uploaded_file, conversion_needed, sample_fraction, start_date, end_date)
+    # FIX: Pass a unique file_id (1) to the function call for the first turbine
+    df_clean_1, sheet_name_1 = process_turbine_data(uploaded_file, conversion_needed, sample_fraction, start_date, end_date, file_id=1)
     
     if df_clean_1 is None:
         st.error("Could not process Turbine 1 file. Please check file format and content.")
@@ -355,7 +364,8 @@ if uploaded_file:
         st.info("No valid data to perform anomaly detection.")
     
     if compare_mode and uploaded_file_2:
-        df_clean_2, sheet_name_2 = process_turbine_data(uploaded_file_2, conversion_needed, sample_fraction, start_date, end_date)
+        # FIX: Pass a unique file_id (2) to the function call for the second turbine
+        df_clean_2, sheet_name_2 = process_turbine_data(uploaded_file_2, conversion_needed, sample_fraction, start_date, end_date, file_id=2)
         
         if df_clean_2 is not None:
             sheet_suffix_2 = f" - {sheet_name_2}" if sheet_name_2 else ""
@@ -398,6 +408,9 @@ if uploaded_file:
 )
             set_sensible_limits(fig_compare, pd.concat([df_clean_1, df_clean_2]))
             st.plotly_chart(fig_compare, use_container_width=True)
+            
+            # New line to generate HTML for the comparison chart
+            fig_compare_html = fig_compare.to_html(full_html=False)
         else:
             st.warning("Could not process file for Turbine 2. Please check its format.")
 
@@ -641,27 +654,36 @@ if uploaded_file:
     valid_points = len(df_valid)
     valid_percentage = (valid_points / total_points * 100) if total_points > 0 else 0
     
-    avg_wind = df_clean_1['Wind_Raw'].mean() if not df_clean_1['Wind_Raw'].empty else 'N/A'
-    std_wind = df_clean_1['Wind_Raw'].std() if not df_clean_1['Wind_Raw'].empty else 'N/A'
+    # Calculation of "Average Wind Speed" from "Total Data Points"
+    avg_wind = df_clean_1['Wind_Raw'].mean() if not df_clean_1['Wind_Raw'].empty else np.nan
+    std_wind = df_clean_1['Wind_Raw'].std() if not df_clean_1['Wind_Raw'].empty else np.nan
     
-    avg_power = df_valid['Power_Raw'].mean() if valid_points > 0 else 'N/A'
-    std_power = df_valid['Power_Raw'].std() if valid_points > 0 else 'N/A'
+    # Calculation of "Average Power" from "Total Data Points"
+    avg_power = df_clean_1['Power_Raw'].mean() if not df_clean_1['Power_Raw'].empty else np.nan
+    std_power = df_clean_1['Power_Raw'].std() if not df_clean_1['Power_Raw'].empty else np.nan
+    
+    # Calculation of "Availability" from "Total Data Points"
+    operating_points_total = len(df_clean_1[df_clean_1['Power_Raw'] > 0])
+    availability_total = (operating_points_total / total_points) * 100 if total_points > 0 else np.nan
 
     st.subheader("📊 Final Statistics")
     cols = st.columns(5)
     cols[0].metric("Total Data Points", total_points)
     cols[1].metric("Valid Data Points", valid_points, f"{valid_percentage:.1f}%")
-    cols[2].metric("Average Wind Speed", f"{avg_wind:.2f} m/s" if isinstance(avg_wind, float) else "N/A",
-                   f"±{std_wind:.2f}" if isinstance(std_wind, float) else "")
-    cols[3].metric("Average Power", f"{avg_power:.3f} MW" if isinstance(avg_power, float) else "N/A",
-                   f"±{std_power:.3f}" if isinstance(std_power, float) else "")
-    if 'availability' in locals():
-        cols[4].metric("Availability", f"{availability:.1f}%")
-    else:
-        cols[4].metric("Availability", "N/A")
+    cols[2].metric("Average Wind Speed", f"{avg_wind:.2f} m/s" if isinstance(avg_wind, float) and not np.isnan(avg_wind) else "N/A",
+                   f"±{std_wind:.2f}" if isinstance(std_wind, float) and not np.isnan(std_wind) else "")
+    cols[3].metric("Average Power", f"{avg_power:.3f} MW" if isinstance(avg_power, float) and not np.isnan(avg_power) else "N/A",
+                   f"±{std_power:.3f}" if isinstance(std_power, float) and not np.isnan(std_power) else "")
+    cols[4].metric("Availability", f"{availability_total:.1f}%" if isinstance(availability_total, float) and not np.isnan(availability_total) else "N/A")
 
     st.markdown("---")
     st.subheader("📤 Export Full Analysis")
+    # New logic to conditionally add the comparison plot HTML
+    comparison_html_section = f"""
+        <h2>Turbine Comparison</h2>
+        <div class="plot">{fig_compare_html}</div>
+    """ if fig_compare_html else ''
+
     html_content = f"""
 <!DOCTYPE html>
 <html>
@@ -681,6 +703,8 @@ if uploaded_file:
         <h1>🌬️ Power Curve Analysis - Vestas V90 2MW MK7</h1>
         <p>Report generated on {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
         <p>File analyzed: {uploaded_file.name}{' - Sheet: ' + sheet_name_1 if sheet_name_1 else ''}</p>
+        
+        {comparison_html_section}
         
         <h2>Data Quality Overview</h2>
         <div class="plot">{fig1.to_html(full_html=False)}</div>
@@ -709,7 +733,7 @@ if uploaded_file:
             <li>Valid Data Points: {valid_points} ({valid_percentage:.1f}%)</li>
             <li>Average Wind Speed: {avg_wind:.2f} ± {std_wind:.2f} m/s</li>
             <li>Average Power: {avg_power:.3f} ± {std_power:.3f} MW</li>
-            <li>Availability: {availability:.1f}%</li>
+            <li>Availability: {availability_total:.1f}%</li>
         </ul>
         
         <div class="footer">
