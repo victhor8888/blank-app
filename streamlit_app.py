@@ -747,7 +747,7 @@ if uploaded_file:
     st.download_button(
         label="📄 Download Full Report (HTML)",
         data=html_content,
-        file_name=f"SCADA_Analysis_Report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.html",
+        file_name=f"Power_Curve_Analysis_Report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.html",
         mime="text/html"
     )
     
