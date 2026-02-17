@@ -1,0 +1,33 @@
+{
+    "turbines": {
+        "T01": {"x": 100, "y": 200, "w": 50, "h": 50, "sensitivity_red": 10, "sensitivity_yellow": 15},
+        "T02": {"x": 160, "y": 200, "w": 50, "h": 50, "sensitivity_red": 10, "sensitivity_yellow": 15},
+        "T03": {"x": 220, "y": 200, "w": 50, "h": 50, "sensitivity_red": 10, "sensitivity_yellow": 15}
+    },
+    "detection": {
+        "interval": 5
+    },
+    "notifications": {
+        "email": {
+            "enabled": true,
+            "smtp_server": "smtp.gmail.com",
+            "smtp_port": 465,
+            "sender": "tu_correo@gmail.com",
+            "password": "tu_contraseña_aplicacion",
+            "recipients": [
+                "destinatario1@empresa.com",
+                "destinatario2@empresa.com",
+                "destinatario3@empresa.com"
+            ]
+        },
+        "telegram": {
+            "token": "TU_BOT_TOKEN",
+            "chat_id": "TU_CHAT_ID"
+        }
+    },
+    "paths": {
+        "log_file": "logs/andromeda.log",
+        "statistics_file": "data/statistics.json",
+        "csv_file": "data/turbines.csv"
+    }
+}
