@@ -1,0 +1,39 @@
+{
+    "turbines": {
+        "A1": {"x": 240, "y": 180, "w": 60, "h": 80, "sensitivity_red": 10, "sensitivity_yellow": 15},
+        "A2": {"x": 340, "y": 180, "w": 60, "h": 80, "sensitivity_red": 10, "sensitivity_yellow": 15},
+        "NTK": {"x": 700, "y": 180, "w": 60, "h": 80, "sensitivity_red": 10, "sensitivity_yellow": 15},
+        "N54": {"x": 940, "y": 180, "w": 60, "h": 80, "sensitivity_red": 10, "sensitivity_yellow": 15},
+        "B1": {"x": 470, "y": 380, "w": 60, "h": 80, "sensitivity_red": 10, "sensitivity_yellow": 15},
+        "B2": {"x": 580, "y": 380, "w": 60, "h": 80, "sensitivity_red": 10, "sensitivity_yellow": 15},
+        "B3": {"x": 690, "y": 380, "w": 60, "h": 80, "sensitivity_red": 10, "sensitivity_yellow": 15},
+        "C1": {"x": 770, "y": 620, "w": 60, "h": 80, "sensitivity_red": 10, "sensitivity_yellow": 15},
+        "C2": {"x": 890, "y": 620, "w": 60, "h": 80, "sensitivity_red": 10, "sensitivity_yellow": 15},
+        "C3": {"x": 1010, "y": 620, "w": 60, "h": 80, "sensitivity_red": 10, "sensitivity_yellow": 15}
+    },
+    "detection": {
+        "interval": 5
+    },
+    "notifications": {
+        "email": {
+            "enabled": true,
+            "smtp_server": "smtp.gmail.com",
+            "smtp_port": 465,
+            "sender": "tu_correo@gmail.com",
+            "password": "tu_contraseña_aplicacion",
+            "recipients": [
+                "destinatario1@empresa.com",
+                "destinatario2@empresa.com"
+            ]
+        },
+        "telegram": {
+            "token": "TU_BOT_TOKEN",
+            "chat_id": "TU_CHAT_ID"
+        }
+    },
+    "paths": {
+        "log_file": "logs/andromeda.log",
+        "statistics_file": "data/statistics.json",
+        "csv_file": "data/turbines.csv"
+    }
+}
